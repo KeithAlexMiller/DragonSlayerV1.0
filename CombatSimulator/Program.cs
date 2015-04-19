@@ -36,51 +36,52 @@ namespace CombatSimulator
         static void Main(string[] args)
         {
             Introduction(true);
-            Console.WriteLine("The time for fear has passed so change your pants and take action...\n\n");
-            HPDisplay(true);
+            Console.WriteLine("The time for fear has passed so change your pants and take action! Frantically, press any key you wish.");
+            Console.ReadKey();
             gameOn = true;
             Console.Clear();
 
+            //gameOn value determines if game will run
             while (gameOn == true)
             {
-                HPDisplay(true);
-                
+                //determines end game scenario (Play Again?)
+                if (gameOver == false)
+                {
+                    if (heroAttacking == true)
+                    {
+                        HPDisplay(true);
+                        ChooseAction();
+                        {
+
+                            if (IsValidInput(weaponChoiceInput) == true)
+                            {
+                                HPDisplay(true);
+                                DamageCalc(weaponChoiceInput);
+                                if (IsAttackSuccessful(weaponChoiceInput))
+                                {
+                                    HPCalc();
+                                }
+                            }
+                        }
+                    }
+                    else if (dragonAttacking == true)
+                    {
+                        HPDisplay(true);
+                        DamageCalc(weaponChoiceInput);
+                        IsAttackSuccessful(weaponChoiceInput);
+                        HPCalc();
+
+                    }
+                    damageFromSword = 0;
+                    damageFromMagic = 0;
+                    damageFromDragon = 0;
+                    healHP = 0;
+                    weaponChoiceInput = String.Empty;
+                }
                 if (gameOver == true)
                 {
                     EndGame(gameOver);
                 }
-
-                if (heroAttacking == true)
-                {
-                    ChooseAction();
-                    {
-
-                        if (IsValidInput(weaponChoiceInput) == true)
-                        {
-                            HPDisplay(true);
-                            DamageCalc(weaponChoiceInput);
-                            if (IsAttackSuccessful(weaponChoiceInput))
-                            {
-                                HPCalc();
-                            }
-                        }
-                        dragonAttacking = true;
-                    }
-                }
-                else if (dragonAttacking == true)
-                {
-                    HPDisplay(true);
-                    DamageCalc(weaponChoiceInput);
-                    if (IsAttackSuccessful(weaponChoiceInput))
-                    {
-                        HPCalc();
-                        heroAttacking = true;
-                    }
-                }
-                damageFromSword = 0;
-                damageFromMagic = 0;
-                damageFromDragon = 0;
-                weaponChoiceInput = String.Empty;
             }
         }
 
@@ -108,7 +109,7 @@ namespace CombatSimulator
             Console.WriteLine("Hit enter to continue...");
             Console.ReadKey();
             Console.Clear();
-            Console.WriteLine("Here's the deal: \n\nBrad will choose an action. \n\nYou can do this by pressing 1, 2, or 3. \n\nHe can either attack with a sharp pointy thing, a mystical ball of flaming gas  or he can heal himself to continue the fight and vanquish his foe. \n\nThen it's the dragaon's turn to attack. \n\nThis will go on until someone dies. Let's root for the hero!");
+            Console.WriteLine("Here's the deal: \n\nBrad will choose an action. \n\nYou can convince him to do things by pressing 1, 2, or 3. \n\nHe can either attack with a sharp pointy thing, a mystical ball of flaming gas  or he can heal himself to continue the fight and vanquish his foe. \n\nThen it's the dragaon's turn to attack. \n\nThis will go on until someone dies. Let's root for the hero!");
             Console.WriteLine();
             Console.WriteLine("Hit enter to continue...");
             Console.ReadKey();
@@ -143,13 +144,43 @@ namespace CombatSimulator
 
         public static bool HPDisplay(bool isDisplayed)
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("                                                          Brad's Hit Points: " + heroHP);
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("                                               Gary the Dragon's Hit Points: " + dragonHP);
-            Console.ResetColor();
+            if (heroHP <= 0)
+            {
+                Console.Clear();
+                Console.WriteLine("You have been ");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("brutally slain");
+                Console.ResetColor();
+                Console.WriteLine(". It's not pretty.");
+                heroAttacking = false;
+                gameOver = true;
+                gameOn = false;
+            }
+            if (dragonHP <= 0)
+            {
+                Console.Clear();
+                Console.Write("Congratulations! Brad has ");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("slain the dragon");
+                Console.ResetColor();
+                Console.WriteLine("!");
+                Console.Write("Unfortunately he is suddenly with an odd sense of disgust, foreboding and shame. This is one case where violence was not the answer.");
+                dragonAttacking = false;
+                gameOver = true;
+                gameOn = false;
+            }
+            else
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("                                                          Brad's Hit Points: " + heroHP);
+                Console.ResetColor();
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("                                               Gary the Dragon's Hit Points: " + dragonHP);
+                Console.ResetColor();
+                Console.WriteLine();
+            }
             return true;
         }
 
@@ -157,8 +188,7 @@ namespace CombatSimulator
         {
             if (gameOver == false)
             {
-
-                if (weaponChoiceInput.All(Char.IsDigit) && weaponChoiceInput != null && weaponChoiceInput != string.Empty || yesNoInput.Contains("YyNn") && yesNoInput != null && yesNoInput != string.Empty)
+                if (weaponChoiceInput.All(Char.IsDigit) && weaponChoiceInput != null && weaponChoiceInput != string.Empty)
                 {
                     return true;
                 }
@@ -174,7 +204,20 @@ namespace CombatSimulator
                     return false;
                 }
             }
-            return true;
+            if (gameOver == true)
+            {
+                if (@"Nn".Any(yesNoInput.Contains) && yesNoInput != null && yesNoInput != string.Empty)
+                {
+                    return true;
+                }
+                if (@"Yy".Any(yesNoInput.Contains) && yesNoInput != null && yesNoInput != string.Empty)
+                {
+                    gameOver = false;
+                    gameOn = true;
+                    return true;
+                }
+            }
+            return false;
         }
         public static int DamageCalc(string weaponChoiceInput)
         {
@@ -220,8 +263,6 @@ namespace CombatSimulator
                 Random rnd = new Random();
                 healHP = rnd.Next(10, 21);
 
-                heroHP += healHP;
-
                 Console.WriteLine("In order to forget his many past trangressions, (and to try to recover from the very common 'fatigue of dragon slaying') Brad drinks deeply from his trusty flask filled with the 'Mead of Epic Inebriation'.");
 
                 Console.WriteLine();
@@ -234,32 +275,36 @@ namespace CombatSimulator
                 Console.WriteLine();
                 Console.WriteLine();
                 Console.WriteLine("Quickly! Hit enter to continue...");
+
                 Console.ReadKey();
 
                 return heroHP;
 
             }
-            else
+            else if (gameOver != true)
             {
+                Console.WriteLine();
                 Console.Write("Brad uses his fist to punch the dragon. Now he is left with a ");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write("bloody stump");
                 Console.ResetColor();
-                Console.Write(". I can't say I'm surprised...");
+                Console.Write(". I   can't say I'm surprised...");
+                Console.Write("Gary deals a massively destructive blow!");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine();
                 Console.Write("\nNext time just enter a number, ");
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("1, 2 or 3");
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(" will work just fine. Come on dude (or lady), a man's life depends on this.");
+                Console.Write(" will work just fine. Come on dude (or  lady), a man's life depends on this.");
                 Console.ResetColor();
-                Console.WriteLine("\n\n\nHit enter to continue...");
+                Console.WriteLine("\n\nHit enter to continue...");
                 Console.ReadKey();
                 Console.ResetColor();
-                Console.Clear();
-                heroAttacking = false;
                 dragonAttacking = true;
+                heroAttacking = false;
+                damageFromDragon = 101;
+                Console.Clear();
             }
             return 42;
         }
@@ -272,6 +317,7 @@ namespace CombatSimulator
                 attackSuccesValue = rnd.Next(1, 11);
                 if (attackSuccesValue <= 7)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Brad attacks the behemoth dragon with the Sword of Infinite Sorrow and Other Stuff. Also it smells like butterscotch! Mmmmmmm.... butterscotch.");
                     Console.WriteLine();
                     Console.Write("Brad's");
@@ -294,9 +340,9 @@ namespace CombatSimulator
                 }
                 else if (attackSuccesValue >= 8)
                 {
-                    Console.Write("Brad trips and falls. The ");
+                    Console.Write("Brad unshealths his sword of legend and run to attack and looks really quite heroic, until he trips and falls and impales himself. The ");
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("attack fails ");
+                    Console.Write("attack FAILS ");
                     Console.ResetColor();
                     Console.WriteLine("and frankly, it's a little pathetic.");
                     Console.ResetColor();
@@ -304,7 +350,9 @@ namespace CombatSimulator
                     Console.WriteLine("Hit enter to continue...");
                     Console.ReadKey();
                     Console.Clear();
+                    damageFromSword = 0;
                     dragonAttacking = true;
+                    heroAttacking = false;
                     return isHitSuccessful = false;
                 }
             }
@@ -337,7 +385,6 @@ namespace CombatSimulator
                     Console.ResetColor();
                     Console.Write("to Brad.");
                     Console.WriteLine();
-                    Console.WriteLine();
                     Console.WriteLine("Hit enter to continue...");
                     Console.ReadKey();
                     Console.Clear();
@@ -345,6 +392,7 @@ namespace CombatSimulator
                 }
                 else if (attackSuccesValue >= 9)
                 {
+                    Console.WriteLine();
                     Console.Write("Gary turned his rage onto our hero. He scorches the ground with his blazing breath but ");
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write("FAILS spectacularly");
@@ -360,7 +408,7 @@ namespace CombatSimulator
                     Console.WriteLine("Hit enter to continue...");
                     Console.ReadKey();
                     Console.Clear();
-                    dragonAttacking = false;
+                    damageFromDragon = 0;
                     return isHitSuccessful = false;
                 }
             }
@@ -370,64 +418,70 @@ namespace CombatSimulator
         }
         public static void HPCalc()
         {
-            if (heroHP <= 0)
-            {
-                Console.Clear();
-                Console.WriteLine("You have been ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("brutally slain");
-                Console.ResetColor();
-                Console.WriteLine(". It's not pretty.");
-                gameOver = true;
-            }
-            if (dragonHP <= 0)
-            {
-                Console.Clear();
-                Console.WriteLine("Congratulations! Brad has ");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("slain the dragon");
-                Console.ResetColor();
-                Console.Write("Unfortunately he is suddenly with an odd sense of disgust, foreboding and shame. This is one case where violence was not the answer.");
-                gameOver = true;
-            }
             if (dragonHP != 0 && heroAttacking == true)
             {
                 Console.Clear();
                 dragonHP -= damageFromSword;
                 dragonHP -= damageFromMagic;
-                heroAttacking = false;
+                heroHP += healHP;
             }
             if (heroHP != 0 && dragonAttacking == true)
             {
                 Console.Clear();
                 heroHP -= damageFromDragon;
+            }
+            if (dragonAttacking == true)
+            {
                 dragonAttacking = false;
+                heroAttacking = true;
+
+            }
+            else if (heroAttacking == true)
+            {
+                heroAttacking = false;
+                dragonAttacking = true;
             }
         }
 
         public static bool EndGame(bool gameOver)
         {
             {
-                Console.WriteLine("The game is OVER, but all is not lost you can play again.");
-                Console.WriteLine("Would you like to play again? YES/NO");
+                dragonAttacking = false;
+                heroAttacking = false;
+                Console.WriteLine();
+                Console.WriteLine("The game is OVER, but don't cry about it or anything. You can play again!");
+                Console.WriteLine();
+                Console.Write("How about it fella? YES/NO ");
+                yesNoInput = Console.ReadLine();
             }
 
             if (IsValidInput(yesNoInput) && @"Yy".Any(yesNoInput.Contains))
             {
                 Console.WriteLine();
                 Console.WriteLine("The dragon has arisen. Let's play again!");
+                gameOn = true;
+                gameOver = false;
+                dragonHP = 200;
+                heroHP = 100;
+                heroAttacking = true;
+                dragonAttacking = false;
+                damageFromSword = 0;
+                damageFromMagic = 0;
+                damageFromDragon = 0;
+                healHP = 0;
                 Console.ReadKey();
-                yesNoInput = String.Empty;
-                return gameOver = false;
+                return true;
             }
             if (IsValidInput(yesNoInput) && @"Nn".Any(yesNoInput.Contains))
             {
                 Console.WriteLine();
                 Console.WriteLine("You are a weak and feeble player...");
+                gameOn = false;
+                gameOver = true;
                 Console.ReadKey();
-                return gameOn = false;
+                return false;
             }
-            return false;
+            return true;
         }
     }
 }
